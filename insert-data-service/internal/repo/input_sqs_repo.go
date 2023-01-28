@@ -1,6 +1,7 @@
 package repo
 
 import (
+	"github.com/ViniciusCrisol/metrics-repo/insert-data-service/log"
 	"github.com/ViniciusCrisol/metrics-repo/insert-data-service/pkg/input"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -29,7 +30,11 @@ func (repo *inputSQSRepo) Get() ([]*input.Input, error) {
 		},
 	)
 	if err != nil {
-		// TODO: Log it!
+		log.Logger.Error(
+			"Failed to retrieve the 10 first queue message",
+			log.Error(err),
+			log.String("queue_url", repo.url),
+		)
 		return nil, err
 	}
 	return repo.sqsMsgsToInputs(r), nil
@@ -55,7 +60,12 @@ func (repo *inputSQSRepo) Delete(i *input.Input) error {
 		},
 	)
 	if err != nil {
-		// TODO: Log it!
+		log.Logger.Error(
+			"Failed to delete SQS message",
+			log.Error(err),
+			log.String("queue_url", repo.url),
+			log.String("message_id", i.ID),
+		)
 		return err
 	}
 	return nil

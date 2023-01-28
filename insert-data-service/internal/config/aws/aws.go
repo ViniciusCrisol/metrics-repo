@@ -2,6 +2,7 @@ package aws
 
 import (
 	"github.com/ViniciusCrisol/metrics-repo/insert-data-service/internal/config"
+	"github.com/ViniciusCrisol/metrics-repo/insert-data-service/log"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -20,7 +21,10 @@ func NewSession() (*session.Session, error) {
 		},
 	)
 	if err != nil {
-		// TODO: Log it!
+		log.Logger.Error(
+			"Failed to init AWS session",
+			log.Error(err),
+		)
 		return nil, err
 	}
 	return s, nil

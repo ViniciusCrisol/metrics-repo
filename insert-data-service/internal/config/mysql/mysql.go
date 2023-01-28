@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/ViniciusCrisol/metrics-repo/insert-data-service/internal/config"
+	"github.com/ViniciusCrisol/metrics-repo/insert-data-service/log"
 )
 
 const (
@@ -17,7 +18,10 @@ const (
 func NewConn() (*sql.DB, error) {
 	c, err := sql.Open(kind, config.DBConnURL)
 	if err != nil {
-		// TODO: Log it!
+		log.Logger.Error(
+			"Failed to init DB session",
+			log.Error(err),
+		)
 		return nil, err
 	}
 	c.SetMaxIdleConns(maxIdleConns)
@@ -25,7 +29,10 @@ func NewConn() (*sql.DB, error) {
 	c.SetConnMaxLifetime(connMaxLifetime)
 
 	if err = c.Ping(); err != nil {
-		// TODO: Log it!
+		log.Logger.Error(
+			"Failed to establish DB connection",
+			log.Error(err),
+		)
 		return nil, err
 	}
 	return c, nil

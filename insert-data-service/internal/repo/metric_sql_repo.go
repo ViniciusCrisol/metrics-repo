@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"time"
 
+	"github.com/ViniciusCrisol/metrics-repo/insert-data-service/log"
 	"github.com/ViniciusCrisol/metrics-repo/insert-data-service/pkg/metric"
 )
 
@@ -30,7 +31,12 @@ func (repo *metricSQLRepo) Create(m *metric.Metric) error {
 		time.Now(),
 	)
 	if err != nil {
-		// TODO: Log it!
+		log.Logger.Error(
+			"Failed to insert a new metric",
+			log.Error(err),
+			log.String("data", m.Data),
+			log.String("app_name", m.AppName),
+		)
 		return err
 	}
 	return nil
