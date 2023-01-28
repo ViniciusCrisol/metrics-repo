@@ -5,59 +5,65 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
+	"time"
 
+	"github.com/ViniciusCrisol/metrics-repo/insert-data-service/internal/config"
+	"github.com/ViniciusCrisol/metrics-repo/insert-data-service/internal/config/aws"
+	"github.com/ViniciusCrisol/metrics-repo/insert-data-service/internal/config/mysql"
+	"github.com/ViniciusCrisol/metrics-repo/insert-data-service/internal/repo"
 	"github.com/ViniciusCrisol/metrics-repo/insert-data-service/pkg/input"
 	"github.com/ViniciusCrisol/metrics-repo/insert-data-service/pkg/metric"
 )
 
 func main() {
-	// w, err := newWorker()
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// w.exec()
+	w, err := newWorker()
+	if err != nil {
+		panic(err)
+	}
+	w.Exec()
 }
 
 type worker struct {
-	units        int
+	inputRepo  input.Repo
+	metricRepo metric.Repo
+
 	shutdown     chan os.Signal
 	stopUnits    chan bool
 	stoppedUnits chan bool
-	inputRepo    input.Repo
-	metricRepo   metric.Repo
 }
 
-// func newWorker() (*worker, error) {
-// 	w := &worker{
-// 		units:        cfg.WorkerUnits,
-// 		shutdown:     make(chan os.Signal, 1),
-// 		stopUnits:    make(chan bool, cfg.WorkerUnits),
-// 		stoppedUnits: make(chan bool, cfg.WorkerUnits),
-// 	}
-// 	return w, w.initModules(cfg.SQS)
-// }
+const workUnits = 5
 
-// func (w *worker) initModules(sqsURL string) error {
-// 	s, err := aws.Session()
-// 	if err != nil {
-// 		return err
-// 	}
-// 	d, err := dba.GetDB()
-// 	if err != nil {
-// 		return err
-// 	}
-// 	w.inputRepo = repo.NewSQSInputRepo(sqsURL, aws.SQS(s))
-// 	w.metricRepo = repo.NewSQLMetricRepo(d)
-// 	return nil
-// }
+func newWorker() (*worker, error) {
+	w := &worker{
+		shutdown:     make(chan os.Signal, 1),
+		stopUnits:    make(chan bool, workUnits),
+		stoppedUnits: make(chan bool, workUnits),
+	}
+	return w, w.initModules(config.SQS)
+}
 
-func (w *worker) exec() {
+func (w *worker) initModules(sqsURL string) error {
+	s, err := aws.NewSession()
+	if err != nil {
+		return err
+	}
+	d, err := mysql.NewConn()
+	if err != nil {
+		return err
+	}
+	w.inputRepo = repo.NewInputSQSRepo(sqsURL, aws.NewSQS(s))
+	w.metricRepo = repo.NewMetricSQLRepo(d)
+	return nil
+}
+
+func (w *worker) Exec() {
 	w.initUnits()
 	w.handleShutdown()
 }
 
 func (w *worker) initUnits() {
-	for u := 1; u <= w.units; u++ {
+	for u := 1; u <= workUnits; u++ {
 		go w.initUnit()
 	}
 }
@@ -71,6 +77,10 @@ func (w *worker) initUnit() {
 		default:
 			is, err := w.inputRepo.Get()
 			if err != nil {
+				continue
+			}
+			if len(is) == 0 {
+				time.Sleep(time.Minute)
 				continue
 			}
 			wg := &sync.WaitGroup{}
@@ -105,14 +115,14 @@ func (w *worker) handleShutdown() {
 
 	<-w.shutdown
 
-	for u := 1; u <= w.units; u++ {
+	for u := 1; u <= workUnits; u++ {
 		w.stopUnits <- true
 	}
 
 	sppd := 0
 	for <-w.stopUnits {
 		sppd++
-		if sppd == w.units {
+		if sppd == workUnits {
 			break
 		}
 	}

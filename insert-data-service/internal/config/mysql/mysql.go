@@ -14,7 +14,7 @@ const (
 	connMaxLifetime = time.Minute
 )
 
-func NewDBConn() (*sql.DB, error) {
+func NewConn() (*sql.DB, error) {
 	c, err := sql.Open(kind, config.DBConnURL)
 	if err != nil {
 		// TODO: Log it!
