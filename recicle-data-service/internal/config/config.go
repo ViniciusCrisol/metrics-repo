@@ -10,6 +10,7 @@ import (
 var (
 	Env = ""
 
+	Bucket    = ""
 	AWSLogin  = ""
 	AWSSecret = ""
 	AWSRegion = ""
@@ -22,6 +23,7 @@ func init() {
 
 	Env = os.Getenv("ENV")
 
+	AWSLogin = os.Getenv("BUCKET")
 	AWSLogin = os.Getenv("AWS_LOGIN")
 	AWSSecret = os.Getenv("AWS_SECRET")
 	AWSRegion = os.Getenv("AWS_REGION")

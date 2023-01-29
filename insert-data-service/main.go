@@ -26,12 +26,12 @@ func main() {
 }
 
 type worker struct {
-	inputRepo  input.Repo
-	metricRepo metric.Repo
-
 	shutdown     chan os.Signal
 	stopUnits    chan bool
 	stoppedUnits chan bool
+
+	inputRepo  input.Repo
+	metricRepo metric.Repo
 }
 
 func newWorker() (*worker, error) {
@@ -52,8 +52,11 @@ func (w *worker) initModules(sqsURL string) error {
 	if err != nil {
 		return err
 	}
-	w.inputRepo = repo.NewInputSQSRepo(sqsURL, aws.NewSQS(s))
 	w.metricRepo = repo.NewMetricSQLRepo(d)
+	w.inputRepo = repo.NewInputSQSRepo(
+		sqsURL,
+		aws.NewSQS(s),
+	)
 	return nil
 }
 

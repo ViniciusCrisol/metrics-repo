@@ -3,6 +3,7 @@ package main
 import (
 	"time"
 
+	"github.com/ViniciusCrisol/metrics-repo/recicle-data-service/internal/config"
 	"github.com/ViniciusCrisol/metrics-repo/recicle-data-service/internal/config/aws"
 	"github.com/ViniciusCrisol/metrics-repo/recicle-data-service/internal/config/mysql"
 	"github.com/ViniciusCrisol/metrics-repo/recicle-data-service/internal/repo"
@@ -39,7 +40,11 @@ func (w *worker) initModules() error {
 	if err != nil {
 		return err
 	}
-	w.metricRepo = repo.NewMetricSQLS3Repo(aws.NewS3(s), d)
+	w.metricRepo = repo.NewMetricSQLS3Repo(
+		d,
+		config.Bucket,
+		aws.NewS3(s),
+	)
 	return nil
 }
 

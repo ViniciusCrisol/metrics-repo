@@ -13,9 +13,7 @@ type metricSQLRepo struct {
 }
 
 func NewMetricSQLRepo(dbConn *sql.DB) *metricSQLRepo {
-	return &metricSQLRepo{
-		dbConn,
-	}
+	return &metricSQLRepo{dbConn}
 }
 
 const insertMetricSQLCommand = `

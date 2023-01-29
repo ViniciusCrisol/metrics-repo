@@ -18,10 +18,7 @@ const (
 func NewConn() (*sql.DB, error) {
 	c, err := sql.Open(kind, config.DBConnURL)
 	if err != nil {
-		log.Logger.Error(
-			"Failed to init DB session",
-			log.Error(err),
-		)
+		log.Logger.Error("Failed to init DB session", log.Error(err))
 		return nil, err
 	}
 	c.SetMaxIdleConns(maxIdleConns)
@@ -29,10 +26,7 @@ func NewConn() (*sql.DB, error) {
 	c.SetConnMaxLifetime(connMaxLifetime)
 
 	if err = c.Ping(); err != nil {
-		log.Logger.Error(
-			"Failed to establish DB connection",
-			log.Error(err),
-		)
+		log.Logger.Error("Failed to establish DB connection", log.Error(err))
 		return nil, err
 	}
 	return c, nil

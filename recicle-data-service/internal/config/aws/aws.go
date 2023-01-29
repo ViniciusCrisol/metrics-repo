@@ -21,10 +21,7 @@ func NewSession() (*session.Session, error) {
 		},
 	)
 	if err != nil {
-		log.Logger.Error(
-			"Failed to init AWS session",
-			log.Error(err),
-		)
+		log.Logger.Error("Failed to init AWS session", log.Error(err))
 		return nil, err
 	}
 	return s, nil
