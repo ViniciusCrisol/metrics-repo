@@ -20,7 +20,7 @@ func NewMetricSQLRepo(dbConn *sql.DB) *metricSQLRepo {
 
 const insertMetricSQLCommand = `
 	insert into app_metrics(data, app_name, created_at)
-	VALUES(?, ?, ?);
+	values(?, ?, ?);
 `
 
 func (repo *metricSQLRepo) Create(m *metric.Metric) error {

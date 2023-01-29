@@ -15,6 +15,8 @@ import (
 	"github.com/ViniciusCrisol/metrics-repo/insert-data-service/pkg/metric"
 )
 
+const workUnits = 5
+
 func main() {
 	w, err := newWorker()
 	if err != nil {
@@ -31,8 +33,6 @@ type worker struct {
 	stopUnits    chan bool
 	stoppedUnits chan bool
 }
-
-const workUnits = 5
 
 func newWorker() (*worker, error) {
 	w := &worker{
